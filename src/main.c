@@ -14,7 +14,7 @@
 #include "display.h"
 
 /* Global state definitions */
-Display *dpy = NULL;
+Display *display = NULL;
 Window root = 0;
 int screen_w = 0, screen_h = 0;
 Atom wm_protocols, wm_delete;
@@ -39,11 +39,11 @@ int main(void) {
 
 	while (running) {
 		XEvent ev;
-		XNextEvent(dpy, &ev);
+		XNextEvent(display, &ev);
 		switch (ev.type) {
 			case MapRequest:
 				add_win(ev.xmaprequest.window);
-				XMapWindow(dpy, ev.xmaprequest.window);
+				XMapWindow(display, ev.xmaprequest.window);
 				focus_window(nwins - 1);
 				apply_layout();
 				break;
@@ -68,16 +68,18 @@ int main(void) {
 				wc.border_width = ev.xconfigurerequest.border_width;
 				wc.sibling = ev.xconfigurerequest.above;
 				wc.stack_mode = ev.xconfigurerequest.detail;
-				XConfigureWindow(dpy, ev.xconfigurerequest.window, ev.xconfigurerequest.value_mask, &wc);
+				XConfigureWindow(display, ev.xconfigurerequest.window, ev.xconfigurerequest.value_mask, &wc);
 				break;
 			}
 			case KeyPress: {
 				KeySym ks = XLookupKeysym(&ev.xkey, 0);
 				int shift = ev.xkey.state & ShiftMask;
 				int alt = ev.xkey.state & Mod1Mask;
+
 				if (ks == XK_Return && alt) {
 					spawn_terminal();
 				} else if (ks == XK_q && alt) {
+                    close_all();
 					running = 0;
 				} else if (ks == XK_j && alt && nwins > 0) {
 					focus_window((focused_idx + 1) % nwins);
@@ -85,7 +87,31 @@ int main(void) {
 					focus_window((focused_idx - 1 + nwins) % nwins);
 				} else if (ks == XK_c && alt && shift) {
 					close_focused();
-				}
+				} else if (ks == XK_Up && alt && nwins > 0) {
+                    if (focused_idx > 0) {
+                        Window tmp = wins[focused_idx];
+                        wins[focused_idx] = wins[focused_idx - 1];
+                        wins[focused_idx - 1] = tmp;
+                        focus_window(focused_idx - 1);
+                        apply_layout();
+                    }
+                } else if (ks == XK_Down && alt && nwins > 0) {
+                    if (focused_idx < nwins - 1) {
+                        Window tmp = wins[focused_idx];
+                        wins[focused_idx] = wins[focused_idx + 1];
+                        wins[focused_idx + 1] = tmp;
+                        focus_window(focused_idx + 1);
+                        apply_layout();
+                    }
+                } else if (ks == XK_Left && alt && nwins > 1) {
+                    if (focused_idx > 0) {
+                        Window tmp = wins[focused_idx];
+                        wins[focused_idx] = wins[0];
+                        wins[0] = tmp;
+                        focus_window(0);
+                        apply_layout();
+                    }
+                }
 				break;
 			}
 			default:

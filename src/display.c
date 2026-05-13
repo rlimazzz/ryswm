@@ -5,26 +5,26 @@
 #include <X11/Xlib.h>
 
 void init_display(void) {
-	dpy = XOpenDisplay(NULL);
-	if (!dpy) die("cannot open display");
+	display = XOpenDisplay(NULL);
+	if (!display) die("cannot open display");
 
 	XSetErrorHandler(on_xerror);
 
-	root = DefaultRootWindow(dpy);
-	screen_w = DisplayWidth(dpy, DefaultScreen(dpy));
-	screen_h = DisplayHeight(dpy, DefaultScreen(dpy));
+	root = DefaultRootWindow(display);
+	screen_w = DisplayWidth(display, DefaultScreen(display));
+	screen_h = DisplayHeight(display, DefaultScreen(display));
 	
-	wm_protocols = XInternAtom(dpy, "WM_PROTOCOLS", False);
-	wm_delete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	wm_protocols = XInternAtom(display, "WM_PROTOCOLS", False);
+	wm_delete = XInternAtom(display, "WM_DELETE_WINDOW", False);
 
-	XSelectInput(dpy, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask | FocusChangeMask);
+	XSelectInput(display, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask | FocusChangeMask);
 
 	setup_hotkeys();
 	
-	XSync(dpy, False);
+	XSync(display, False);
 }
 
 void cleanup_display(void) {
 	if (wins) free(wins);
-	XCloseDisplay(dpy);
+	XCloseDisplay(display);
 }

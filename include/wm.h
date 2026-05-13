@@ -4,7 +4,7 @@
 #include <X11/Xlib.h>
 
 /* Global window manager state */
-extern Display *dpy;
+extern Display *display;
 extern Window root;
 extern int screen_w, screen_h;
 extern Atom wm_protocols;

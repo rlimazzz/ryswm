@@ -4,15 +4,12 @@
 #include <sys/types.h>
 #include <X11/Xlib.h>
 
-
-void close_focused(void) {
-	if (focused_idx < 0 || focused_idx >= nwins) return;
-	Window w = wins[focused_idx];
+static void close_window(Window w) {
 	Atom *protocols = NULL;
 	int nprotocols = 0;
 	int supports_delete = 0;
-	
-	if (XGetWMProtocols(dpy, w, &protocols, &nprotocols)) {
+
+	if (XGetWMProtocols(display, w, &protocols, &nprotocols)) {
 		for (int i = 0; i < nprotocols; ++i) {
 			if (protocols[i] == wm_delete) {
 				supports_delete = 1;
@@ -21,7 +18,7 @@ void close_focused(void) {
 		}
 		if (protocols) XFree(protocols);
 	}
-	
+
 	if (supports_delete) {
 		XEvent ev = {0};
 		ev.xclient.type = ClientMessage;
@@ -30,10 +27,21 @@ void close_focused(void) {
 		ev.xclient.format = 32;
 		ev.xclient.data.l[0] = wm_delete;
 		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(dpy, w, False, NoEventMask, &ev);
+		XSendEvent(display, w, False, NoEventMask, &ev);
 	} else {
-		XKillClient(dpy, w);
+		XKillClient(display, w);
 	}
+}
+
+void close_all(void) {
+	for (int i = 0; i < nwins; ++i) {
+		close_window(wins[i]);
+	}
+}
+
+void close_focused(void) {
+	if (focused_idx < 0 || focused_idx >= nwins) return;
+	close_window(wins[focused_idx]);
 }
 
 void spawn_terminal(void) {

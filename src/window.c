@@ -29,10 +29,10 @@ void tile(void) {
 	for (int i = 0; i < nwins; ++i) {
 		int y = gap + i * h;
 		int hh = (i == nwins-1) ? (usable_h - h*(nwins-1)) : h;
-		XMoveResizeWindow(dpy, wins[i], gap, y, usable_w - border*2, hh - border*2);
-		XMapWindow(dpy, wins[i]);
+		XMoveResizeWindow(display, wins[i], gap, y, usable_w - border*2, hh - border*2);
+		XMapWindow(display, wins[i]);
 	}
-	XFlush(dpy);
+	XFlush(display);
 }
 
 void tile_tree(void) {
@@ -42,18 +42,18 @@ void tile_tree(void) {
 	int usable_h = screen_h - gap*2;
 	
 	int master_w = (usable_w / 2);
-	XMoveResizeWindow(dpy, wins[0], gap, gap, master_w - border*2, usable_h - border*2);
-	XMapWindow(dpy, wins[0]);
+	XMoveResizeWindow(display, wins[0], gap, gap, master_w - border*2, usable_h - border*2);
+	XMapWindow(display, wins[0]);
 	
 	int stack_w = usable_w - master_w;
 	int stack_h = (nwins > 1) ? (usable_h / (nwins - 1)) : usable_h;
 	for (int i = 1; i < nwins; ++i) {
 		int y = gap + (i - 1) * stack_h;
 		int hh = (i == nwins - 1) ? (usable_h - stack_h * (nwins - 2)) : stack_h;
-		XMoveResizeWindow(dpy, wins[i], gap + master_w, y, stack_w - border*2, hh - border*2);
-		XMapWindow(dpy, wins[i]);
+		XMoveResizeWindow(display, wins[i], gap + master_w, y, stack_w - border*2, hh - border*2);
+		XMapWindow(display, wins[i]);
 	}
-	XFlush(dpy);
+	XFlush(display);
 }
 
 void apply_layout(void) {
@@ -63,6 +63,6 @@ void apply_layout(void) {
 void focus_window(int idx) {
 	if (idx < 0 || idx >= nwins) return;
 	focused_idx = idx;
-	XSetInputFocus(dpy, wins[idx], RevertToPointerRoot, CurrentTime);
-	XRaiseWindow(dpy, wins[idx]);
+	XSetInputFocus(display, wins[idx], RevertToPointerRoot, CurrentTime);
+	XRaiseWindow(display, wins[idx]);
 }
