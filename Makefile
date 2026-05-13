@@ -1,13 +1,22 @@
 CC ?= cc
-CFLAGS ?= -std=c99 -Wall -Wextra -O2
+CFLAGS ?= -std=c99 -Wall -Wextra -O2 -Iinclude
 LDLIBS ?= -lX11
+
+SRCDIR := src
+OBJDIR := build
+SOURCES := $(wildcard $(SRCDIR)/*.c)
+OBJECTS := $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SOURCES))
 
 all: ryswm
 
-ryswm: main.c
-	$(CC) $(CFLAGS) main.c -o $@ $(LDLIBS)
+ryswm: $(OBJECTS)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f ryswm
+	rm -rf ryswm $(OBJDIR)
 
 .PHONY: all clean
